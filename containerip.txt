@@ -1,0 +1,2 @@
+[container]
+{{ container_info['container']['NetworkSettings']['IPAddress'] }} ansible_user=root  ansible_ssh_pass=abhishek ansible_connecton=ssh 

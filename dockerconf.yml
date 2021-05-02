@@ -1,0 +1,59 @@
+- hosts: localhost
+  vars:
+          - container_name: "myweb1"
+          - image_name: "ssh_new:a1"
+            
+  tasks:
+  - name: "installing python36"
+    package:
+      name: "python36"
+
+  - name: "installing package docker-py ."
+    pip: 
+      name: "docker-py" 
+    ignore_errors: yes   
+
+  - name: "pulling docker image"
+    docker_image:
+      name: "{{ image_name }}"
+      source: local
+
+  - name: "creating docker container"
+    docker_container:
+      name: "{{ container_name  }}"
+      image: "{{ image_name }}"
+      state: started
+      interactive: yes
+      detach: yes
+      tty: yes
+
+  - name: "docker container info"
+    docker_container_info: 
+      name: "{{ container_name }}"
+    register: container_info  
+ 
+  - template: 
+      src: "containerip.txt"
+      dest: "/root/ip.txt"
+
+  - meta: refresh_inventory
+  
+  - pause: 
+      seconds: 30
+
+- hosts: container
+  tasks: 
+  - name: "installing httpd package"
+    package:
+      name: "httpd"
+      state: present
+
+  - name: "creating web page"
+    copy: 
+      src: "index.html"
+      dest: "/var/www/html/index.html"
+
+  - name: "starting apache services"
+    command: "/usr/sbin/httpd"
+    changed_when: False
+
